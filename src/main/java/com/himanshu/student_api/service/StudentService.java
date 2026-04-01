@@ -3,54 +3,67 @@ package com.himanshu.student_api.service;
 import com.himanshu.student_api.dto.StudentRequestDTO;
 import com.himanshu.student_api.dto.StudentResponseDTO;
 import com.himanshu.student_api.exception.StudentNotFoundException;
-import com.himanshu.student_api.repository.StudentRepository;
 import com.himanshu.student_api.model.Student;
+import com.himanshu.student_api.repository.StudentRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 @Service
 public class StudentService {
 
-
-    private StudentRepository studentRepository;
-
+    private final StudentRepository studentRepository;
 
     public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
 
-    public List<StudentResponseDTO> getAllStudents(){
+    public List<StudentResponseDTO> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
+
     public StudentResponseDTO getStudentById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
         return toResponseDTO(student);
     }
 
-    public StudentResponseDTO saveStudent(StudentRequestDTO dto){
+    public StudentResponseDTO saveStudent(StudentRequestDTO dto) {
+
+        if (studentRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
         Student student = toEntity(dto);
         Student saved = studentRepository.save(student);
         return toResponseDTO(saved);
     }
 
-        public void deleteStudent(Long id){
-            studentRepository.deleteById(id);
+    @Transactional
+    public void deleteStudent(Long id) {
+        if (!studentRepository.existsById(id)) {
+            throw new StudentNotFoundException(id);
         }
+        studentRepository.deleteById(id);
+    }
 
-    public StudentResponseDTO updateStudent(Long id, StudentRequestDTO dto){
+    @Transactional
+    public StudentResponseDTO updateStudent(Long id, StudentRequestDTO dto) {
+
         Student existing = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
+
         existing.setName(dto.getName());
         existing.setEmail(dto.getEmail());
         existing.setAge(dto.getAge());
+
         return toResponseDTO(studentRepository.save(existing));
     }
+
     private Student toEntity(StudentRequestDTO dto) {
         Student student = new Student();
         student.setName(dto.getName());
@@ -58,6 +71,7 @@ public class StudentService {
         student.setAge(dto.getAge());
         return student;
     }
+
     private StudentResponseDTO toResponseDTO(Student student) {
         StudentResponseDTO dto = new StudentResponseDTO();
         dto.setId(student.getId());
@@ -66,6 +80,4 @@ public class StudentService {
         dto.setAge(student.getAge());
         return dto;
     }
-
-
 }
