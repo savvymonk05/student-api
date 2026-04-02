@@ -1,5 +1,6 @@
 package com.himanshu.student_api.controller;
 
+import com.himanshu.student_api.dto.PaginationResponse;
 import com.himanshu.student_api.dto.StudentRequestDTO;
 import com.himanshu.student_api.dto.StudentResponseDTO;
 import com.himanshu.student_api.service.StudentService;
@@ -19,14 +20,16 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
-        return ResponseEntity.ok(studentService.getAllStudents());
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<StudentResponseDTO> getStudentById(@PathVariable Long id) {
         return ResponseEntity.ok(studentService.getStudentById(id));
+    }
+    @GetMapping
+    public ResponseEntity<PaginationResponse<StudentResponseDTO>> getAllStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return ResponseEntity.ok(studentService.getAllStudents(page, size));
     }
 
     @PostMapping
