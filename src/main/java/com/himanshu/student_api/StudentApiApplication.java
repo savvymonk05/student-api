@@ -8,7 +8,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
@@ -18,27 +17,27 @@ public class StudentApiApplication {
         SpringApplication.run(StudentApiApplication.class, args);
     }
 
-    // ✅ ADD THIS (fixes your error)
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    // ✅ Your runner
     @Bean
     public CommandLineRunner run(UserRepository repo, PasswordEncoder encoder) {
         return args -> {
 
-            System.out.println("🔥 Inserting user...");
+            System.out.println("🔥 Checking admin user...");
 
-            Users user = new Users();
-            user.setUsername("admin");
-            user.setPassword(encoder.encode("admin123"));
-            user.setRole(Role.ADMIN);
+            // ✅ CHECK FIRST
+            if (repo.findByUsername("admin").isEmpty()) {
 
-            repo.save(user);
+                Users user = new Users();
+                user.setUsername("admin");
+                user.setPassword(encoder.encode("admin123")); // 🔐 IMPORTANT
+                user.setRole(Role.ADMIN);
 
-            System.out.println("✅ User inserted");
+                repo.save(user);
+
+                System.out.println("🔥 Admin user created");
+
+            } else {
+                System.out.println("✅ Admin already exists");
+            }
         };
     }
 }

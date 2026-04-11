@@ -2,9 +2,10 @@ package com.himanshu.student_api.security;
 
 import com.himanshu.student_api.model.Users;
 import com.himanshu.student_api.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

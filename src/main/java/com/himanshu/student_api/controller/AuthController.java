@@ -1,6 +1,7 @@
 package com.himanshu.student_api.controller;
 
 import com.himanshu.student_api.dto.AuthRequest;
+import com.himanshu.student_api.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,9 +17,13 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public String login(@RequestBody AuthRequest request) {
+
+        System.out.println("🔥 LOGIN API HIT");
 
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -28,15 +33,14 @@ public class AuthController {
                     )
             );
 
-            if (authentication.isAuthenticated()) {
-                return "Login Successful";
-            } else {
-                return "Authentication Failed";
-            }
+            System.out.println("✅ AUTH SUCCESS");
+
+            return jwtUtil.generateToken(request.getUsername());
 
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 THIS IS THE KEY
-            return "Error: " + e.getMessage();
+            System.out.println("❌ AUTH FAILED");
+            e.printStackTrace(); // 🔥 THIS WILL SHOW REAL REASON
+            throw e;
         }
     }
 }
